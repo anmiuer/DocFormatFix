@@ -24,16 +24,37 @@ DocFormatFix 是一个 Word / Markdown 文档格式整理工具。它识别文�
 
 要求 Python 3.9+，主要面向 Windows。
 
-推荐直接在资源管理器中双击 `DocFormatFix.vbs`，以无窗口方式启动。`启动DocFormatFix.bat` 是兼容入口。启动器会检查 Python、依赖与项目文件，缺失时可自动下载安装或选择本地 Python 环境。
+Windows 推荐双击 `start.bat`。它不依赖 VBScript，会自动查找 `.venv`、`pyw.exe`、`pythonw.exe`、`py.exe` 或 `python.exe`；找不到 Python 时会停留并显示原因。
+
+- `DocFormatFix.vbs`：可选的无窗口入口，需要系统启用 VBScript。
+- `启动DocFormatFix.bat`：兼容入口，内部调用 `start.bat`。
+- `check_env.bat`：启动诊断，打印 Python 路径、版本并执行 `launcher.py --check`。
+
+启动器会检查 Python、依赖与项目文件，缺失时可自动下载安装或选择本地 Python 环境。
 
 手动安装与调试：
 
 ```bash
 pip install -r requirements.txt
+python launcher.py --check
 python gui.py
 ```
 
-`tkinterdnd2` 用于拖拽增强；Windows 自带原生拖放，缺少该依赖时会自动回退，不影响主流程。
+`tkinterdnd2` 用于拖拽增强；Windows 自带原生拖放，缺少该依赖时会自动回退，不影响主流程。macOS / Linux 没有 `.bat` / `.vbs` 入口，请直接运行 `python3 gui.py`。
+
+### 启动失败排查
+
+1. 双击 `start.bat`，观察是否弹出 Python 未找到或启动报错提示。
+2. 运行 `check_env.bat`，确认 Python 路径、版本与 `launcher.py --check` 输出。
+3. 查看 `logs/launcher.log`，启动器会把环境检查和 GUI 异常写入该文件。
+4. 如果从 GitHub 下载 ZIP 后运行时被 Windows 拦截，右键文件 → 属性 → 解除锁定，或在终端运行 `python gui.py`。
+5. 部分 Windows 11 版本默认禁用 VBScript；此时请使用 `start.bat` 或 `python gui.py`，不要依赖 `DocFormatFix.vbs`。
+6. 也可以在项目目录直接运行：
+
+```bash
+python launcher.py --check
+python gui.py
+```
 
 ## 使用
 
