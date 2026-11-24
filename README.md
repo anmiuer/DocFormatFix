@@ -16,6 +16,7 @@ DocFormatFix 是一个 Word / Markdown 文档格式整理工具。它识别文�
 - 新增 `start.bat` 与 `check_env.bat`：Windows 启动不再依赖 VBScript，自动查找可用的 Python 并输出环境诊断。
 - 修复环境检测：缺少 `tkinterdnd2` 时只回退 Windows 原生拖放，不再弹出“环境缺失”对话框。
 - 新增公式保留回归测试：验证 Word 分式、上标、根式、矩阵等 OMML 结构，以及 Markdown `$...$` / `$$...$$` 公式不会被破坏。
+- 优化原文视图：手动改判后使用短暂提示色并自动恢复格式背景；增强不同段落类型的背景色区分。
 - 统一 Windows 启动脚本换行格式，补充下载 ZIP、VBScript 被禁用等启动排查说明。
 
 ## 用途

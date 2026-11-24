@@ -89,22 +89,22 @@ FORMAT_ORDER = [
 ]
 
 FORMAT_STYLES = {
-    "一级标题": {"key": "h1", "bg": "#fde8e8", "fg": "#b42318"},
-    "二级标题": {"key": "h2", "bg": "#fdf1dd", "fg": "#b54708"},
-    "三级标题": {"key": "h3", "bg": "#fbf7d9", "fg": "#8a6100"},
-    "正文": {"key": "body", "bg": "#f2f7f3", "fg": "#1e5e2d"},
-    "参考文献": {"key": "ref", "bg": "#e6f7f5", "fg": "#0f766e"},
-    "表格": {"key": "table", "bg": "#e3ecf7", "fg": "#24538a"},
-    "代码块": {"key": "code", "bg": "#f1f3f5", "fg": "#343a40"},
-    "数学公式": {"key": "math", "bg": "#f3e8ff", "fg": "#6b21a8"},
-    "公式": {"key": "formula", "bg": "#eef2ff", "fg": "#4338ca"},
-    "列表": {"key": "list", "bg": "#eefbf6", "fg": "#0f766e"},
-    "引用": {"key": "quote", "bg": "#fdf6e3", "fg": "#8a6100"},
-    "图注": {"key": "fig", "bg": "#e8f0fe", "fg": "#1d4ed8"},
-    "表注": {"key": "tab", "bg": "#f1e9fd", "fg": "#6d28d9"},
-    "分隔线": {"key": "hr", "bg": "#f8f9fa", "fg": "#6b7280"},
+    "一级标题": {"key": "h1", "bg": "#f7d9d9", "fg": "#9f1d1d"},
+    "二级标题": {"key": "h2", "bg": "#fbe3cb", "fg": "#8a4b00"},
+    "三级标题": {"key": "h3", "bg": "#f5edc2", "fg": "#6e5600"},
+    "正文": {"key": "body", "bg": "#e4f0e4", "fg": "#1d5e2e"},
+    "参考文献": {"key": "ref", "bg": "#d9efeb", "fg": "#0e5f58"},
+    "表格": {"key": "table", "bg": "#d9e6f7", "fg": "#1c4e89"},
+    "代码块": {"key": "code", "bg": "#e7eaed", "fg": "#37474f"},
+    "数学公式": {"key": "math", "bg": "#eadcf8", "fg": "#5b21b6"},
+    "公式": {"key": "formula", "bg": "#dfe4fa", "fg": "#3730a3"},
+    "列表": {"key": "list", "bg": "#dcf2e7", "fg": "#0f6b4f"},
+    "引用": {"key": "quote", "bg": "#f2e8d5", "fg": "#6e5600"},
+    "图注": {"key": "fig", "bg": "#d9e9fc", "fg": "#1d4ed8"},
+    "表注": {"key": "tab", "bg": "#e6dcf7", "fg": "#6d28d9"},
+    "分隔线": {"key": "hr", "bg": "#eef0f2", "fg": "#6b7280"},
     "空段落": {"key": "empty", "bg": "#ffffff", "fg": "#9aa0a6"},
-    "保护": {"key": "protect", "bg": "#eef0f3", "fg": "#5f6368"},
+    "保护": {"key": "protect", "bg": "#e7eaed", "fg": "#5f6368"},
 }
 
 PROTECT_ROW = "__protected__"
@@ -180,6 +180,7 @@ class DocFormatFixApp:
         self._focus_mode = False
         self._suppress_selection_status = False
         self._selection_status_job = None
+        self._flash_job = None
         self._drop_targets = None
         self._last_drop_time = 0.0
         self._last_drop_signature = ()
@@ -1219,7 +1220,10 @@ class DocFormatFixApp:
         )
         self.original_text.tag_configure("body_text", foreground="#1f2329")
         self.original_text.tag_configure(
-            "match", background="#ffd54f", foreground="#1f2329"
+            "match", background="#ffe6a3", foreground="#1f2329"
+        )
+        self.original_text.tag_configure(
+            "flash", background="#dce8ff", foreground="#1f2329"
         )
         for style in FORMAT_STYLES.values():
             key = style["key"]
@@ -1960,6 +1964,7 @@ class DocFormatFixApp:
         return groups
 
     def _render_original_text(self, preview) -> None:
+        self._cancel_flash()
         widget = self.original_text
         widget.configure(state="normal")
         widget.delete("1.0", "end")
@@ -1997,7 +2002,7 @@ class DocFormatFixApp:
                 if position == 0 and group_size > 1:
                     label_text += f" · {group_size}段"
 
-                widget.insert("end", "│ ", f"bar_{key}")
+                widget.insert("end", "┃ ", f"bar_{key}")
                 widget.insert("end", f"{result.index + 1:04d} ", "meta")
                 if position == 0:
                     prefix_start = widget.index("end-1c")
@@ -2073,6 +2078,42 @@ class DocFormatFixApp:
         ]
         self._highlight_indices(indices, f"已高亮「{label}」：{len(indices)} 段")
 
+    def _cancel_flash(self) -> None:
+        if self._flash_job is not None:
+            try:
+                self.root.after_cancel(self._flash_job)
+            except Exception:
+                pass
+            self._flash_job = None
+        try:
+            self.original_text.tag_remove("flash", "1.0", "end")
+        except tk.TclError:
+            pass
+
+    def _clear_flash(self) -> None:
+        self._flash_job = None
+        try:
+            self.original_text.tag_remove("flash", "1.0", "end")
+        except tk.TclError:
+            pass
+
+    def _flash_indices(self, indices, duration: int = 650) -> None:
+        """短暂提示刚修改的段落，随后恢复其格式背景色。"""
+        self._cancel_flash()
+        widget = self.original_text
+        spans = []
+        for index in sorted(set(indices)):
+            span = self.text_ranges.get(index)
+            if span:
+                widget.tag_add("flash", span[0], span[1])
+                spans.append(span)
+        if not spans:
+            return
+        widget.tag_raise("flash")
+        widget.tag_raise("sel")
+        widget.see(spans[0][0])
+        self._flash_job = self.root.after(duration, self._clear_flash)
+
     def _highlight_indices(self, indices, status: str = "") -> None:
         indices = sorted(set(indices))
         widget = self.original_text
@@ -2108,6 +2149,7 @@ class DocFormatFixApp:
         self.original_status_var.set(text + " · 单击选段 / 拖选文字 / 可拆解")
 
     def clear_highlight(self, clear_selection: bool = False) -> None:
+        self._cancel_flash()
         widget = self.original_text
         widget.tag_remove("match", "1.0", "end")
         widget.tag_raise("sel")
@@ -2117,6 +2159,7 @@ class DocFormatFixApp:
         self._set_default_original_status()
 
     def _clear_preview(self, message: str) -> None:
+        self._cancel_flash()
         children = self.preview_tree.get_children()
         if children:
             self.preview_tree.delete(*children)
@@ -2448,7 +2491,8 @@ class DocFormatFixApp:
         self._suppress_status_briefly()
         self._cleanup_manual_state(self.current_file)
         self._redetect_current(preview)
-        self._highlight_indices(indices, message)
+        self._flash_indices(indices)
+        self.original_status_var.set(message)
         self.log(message)
 
     def _end_selection_status_suppression(self) -> None:
