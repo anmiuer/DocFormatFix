@@ -3,6 +3,7 @@
 docx 文档结构识别 + 排版格式自动校准工具；同时支持 Markdown 结构规范化。识别 Word 原生标题样式，也能对没有样式的文档依据字号、加粗、段首编号等特征推断标题层级；只调整排版与结构，不改动正文文字。
 
 - 自用 + 开源，MIT License
+- 项目地址：https://github.com/anmiuer/DocFormatFix
 - CLI 与 Tkinter GUI 共用同一套核心逻辑
 - 输入支持 `.docx`、`.md`、`.markdown`
 - 每次任务强制自动备份，备份目录与输出目录均可自定义
