@@ -1,0 +1,13 @@
+{
+  "confidence_threshold": 70,
+  "auto_backup": true,
+  "default_template": "competition_report",
+  "html_report": false,
+  "backup_dir": "backup",
+  "output_dir": "output",
+  "cleanup": {
+    "merge_empty": false,
+    "revisions": false,
+    "spaces": false
+  }
+}

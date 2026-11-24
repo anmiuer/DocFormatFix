@@ -1,0 +1,8 @@
+# 默认依赖
+python-docx>=1.1.0
+
+# Windows 已内置原生拖放；tkinterdnd2 作为非 Windows/备用拖拽后端（可选）
+tkinterdnd2>=0.4.2
+
+# 可选：Docling 辅助校验插件（extra_plugins/docling_assist.py，默认不启用）
+# docling>=2.0.0

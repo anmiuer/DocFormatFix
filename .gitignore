@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+build/
+dist/
+*.spec
+.idea/
+.vscode/
+.DS_Store
+
+# 运行产物：保留目录，忽略内容
+backup/*
+!backup/.gitkeep
+output/*
+!output/.gitkeep
+
+# 测试临时目录
+tests/tmp/
+*.log
+
+# 启动器运行时产物
+logs/
+config/launcher.json

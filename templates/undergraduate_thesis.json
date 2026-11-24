@@ -1,0 +1,10 @@
+{
+  "一级标题": {"font": "黑体", "size": 16, "bold": true, "indent": false, "line_spacing": 1.5, "space_before": 18, "space_after": 12},
+  "二级标题": {"font": "黑体", "size": 14, "bold": true, "indent": false, "line_spacing": 1.5, "space_before": 12, "space_after": 6},
+  "三级标题": {"font": "黑体", "size": 12, "bold": true, "indent": false, "line_spacing": 1.5, "space_before": 6, "space_after": 3},
+  "正文": {"font": "宋体", "size": 12, "bold": false, "indent": true, "line_spacing": 1.5},
+  "参考文献": {"font": "宋体", "size": 10.5, "bold": false, "indent": false, "line_spacing": 1.25, "space_before": 0, "space_after": 0},
+  "表格": {"font": "宋体", "size": 10.5, "bold": false, "line_spacing": 1.25, "space_before": 0, "space_after": 0},
+  "图注": {"font": "宋体", "size": 10.5, "bold": false, "align": "center"},
+  "表注": {"font": "宋体", "size": 10.5, "bold": false, "align": "center"}
+}
