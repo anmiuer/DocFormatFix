@@ -1,6 +1,6 @@
 # DocFormatFix
 
-DocFormatFix 是一个 Word / Markdown 文档格式整理工具。它识别文档中的标题、正文、参考文献、图注、表注等结构，按所选模板统一字体、字号、首行缩进、行距、段前段后与对齐；只调整排版，不修改正文文字。
+DocFormatFix 是一个 Word / Markdown 文档格式整理工具。它识别文档中的标题、正文、参考文献、表格、图注/表注、列表、引用、公式与代码块等结构，按所选模板统一字体、字号、首行缩进、行距、段前段后与对齐；只调整排版，不修改正文文字。
 
 - 项目地址：https://github.com/anmiuer/DocFormatFix
 - 版本：1.0
@@ -33,12 +33,14 @@ pip install -r requirements.txt
 python gui.py
 ```
 
+`tkinterdnd2` 用于拖拽增强；Windows 自带原生拖放，缺少该依赖时会自动回退，不影响主流程。
+
 ## 使用
 
 ### GUI
 
 1. 选择【单个文件】或【整个文件夹批量处理】，也可以把多个 docx / md 文件或文件夹直接拖入窗口。
-2. 选择排版模板；如需调整输出格式，点击【格式设置…】。如果已有现成的格式要求文本，点击【识别格式要求…】粘贴后自动识别；需要重命名、复制、删除或导入模板时，点击【管理模板…】。
+2. 选择排版模板；如需调整输出格式，点击【格式设置…】。如果已有现成的格式要求文本，点击【识别格式要求…】粘贴后自动识别；需要重命名、复制、删除或导入模板时，点击【管理模板…】。展开【高级选项】可关闭自动推断标题层级、调整置信阈值（60~90）以及启用附加清理（连续空段落 / 修订痕迹与隐藏文字 / 多余空格）。
 3. 点击【预扫描文档】。该步骤只读取文档，不会修改文件。
 4. 在【格式识别与原文】中查看识别结果：单击格式可高亮同类段落；相邻同类型段落默认合并显示，可拖选后【拆解所选】；也可【合并所选】、【保护所选】或【改判为】其他类型。
 5. 确认后点击【执行格式化】。程序先备份原文，再输出到指定目录，并生成 TXT 报告；勾选后会同时生成 HTML 报告。
@@ -61,12 +63,58 @@ python main.py --file ./笔记.md
 # 自定义备份与输出目录
 python main.py --dir ./docs --backup-dir D:\backup\docformatfix --output-dir D:\output\docformatfix
 
+# 调整置信阈值、关闭标题推断并启用附加清理
+python main.py --file ./论文.docx --threshold 75 --no-infer --cleanup spaces revisions
+
 # 查看历史备份 / 恢复最近一次
 python main.py --list-backups
 python main.py --restore latest
 ```
 
+常用参数：
+
+| 参数 | 说明 |
+| --- | --- |
+| `--file FILE` | 处理单个文件，可重复 |
+| `--dir DIR` | 处理文件夹，可重复 |
+| `--template NAME` | 选择排版模板 |
+| `--threshold N` | 置信阈值 50~100，默认读取配置（70） |
+| `--no-infer` | 关闭标题推断，仅使用 Word 原生标题样式 |
+| `--html` | 生成 HTML 报告 |
+| `--backup-dir DIR` | 自定义备份目录 |
+| `--output-dir DIR` | 自定义输出目录 |
+| `--cleanup ITEM...` | 附加清理：`merge_empty`、`revisions`、`spaces` |
+| `--list-backups` | 列出历史备份 |
+| `--restore BACKUP_DIR` | 恢复备份，`latest` 表示最近一次 |
+| `--version` | 显示版本 |
+
+CLI 阈值范围为 50~100；GUI 滑块范围为 60~90。
+
 CLI 没有预览和人工覆写能力，只使用自动识别结果。
+
+### 输出位置
+
+- 文档输出：`<output_dir>/<相对路径>/<文件名>_formatted.docx|md`
+- TXT 报告：`<output_dir>/reports/docformatfix_<时间戳>.txt`
+- HTML 报告：同一 `reports` 目录下的 `.html`（勾选时生成）
+- 备份：`<backup_dir>/<YYYYMMDD_HHMM>/`，含 `manifest.json`
+
+## 配置文件
+
+GUI 与 CLI 默认读取 `config/settings.json`：
+
+| 字段 | 默认值 | 说明 |
+| --- | --- | --- |
+| `confidence_threshold` | `70` | 置信阈值；CLI 范围 50~100，GUI 滑块为 60~90 |
+| `default_template` | `competition_report` | 默认排版模板 |
+| `html_report` | `false` | 是否默认生成 HTML 报告 |
+| `backup_dir` | `backup` | 备份目录，相对项目目录或绝对路径 |
+| `output_dir` | `output` | 输出目录，相对项目目录或绝对路径 |
+| `cleanup` | 三项均 `false` | `merge_empty` / `revisions` / `spaces` 附加清理 |
+
+- GUI 的【目录设置…】会把 `backup_dir` / `output_dir` 写回该文件；其余字段目前作为启动默认值读取。
+- 手动修改配置文件后，GUI 会自动重新读取并同步到界面。
+- 备份始终强制开启，不提供关闭选项。
 
 ## 工作原理
 
@@ -118,14 +166,14 @@ CLI 没有预览和人工覆写能力，只使用自动识别结果。
 ```
 
 - `indent: true` 表示首行缩进 2 字符；也可写数字，如 `1.5` 表示 1.5 字符，`0` 表示不缩进。
-- `line_spacing` 可写倍数（如 `1.5`），也可写固定磅值字符串（如 `"20pt"`）。
+- `line_spacing` 可写倍数（如 `1.5`），也可写固定磅值字符串（如 `"20pt"` 或 `"20磅"`）。
 - `align` 可取 `left`、`center`、`right`、`justify`。
 - 模板缺少某类段落规则时回落使用“正文”；缺少“表格”规则时表格文字保持不变。
 - 可直接新增 JSON 文件，也可在 GUI 中编辑、识别保存或管理模板。
 
 ## 支持范围与限制
 
-- 仅处理 `.docx`、`.md`、`.markdown`；`.doc`、`.docm`、`.pdf` 等会跳过并记录原因。
+- 仅处理 `.docx`、`.md`、`.markdown`；`.doc`、`.docm`、`.dot`、`.dotx`、`.wps`、`.rtf`、`.odt`、`.pdf` 等会跳过并记录原因。
 - 只处理主体段落和表格单元格文字；文本框、艺术字、图片内文字不处理。
 - 不处理页边距、页眉页脚、页码、分栏、水印等页面设置。
 - Word 表格保留结构，但字号或行距变化可能轻微影响行高。
