@@ -11,10 +11,10 @@ If fso.FileExists(pyw) Then
     shell.Run cmd, 0, False
 Else
     On Error Resume Next
-    shell.Run "pyw.exe -3 """ & launcher & """", 0, False
+    shell.Run "pythonw.exe """ & launcher & """", 0, False
     If Err.Number <> 0 Then
         Err.Clear
-        shell.Run "pythonw.exe """ & launcher & """", 0, False
+        shell.Run "pyw.exe -3 """ & launcher & """", 0, False
     End If
     If Err.Number <> 0 Then
         MsgBox "Python was not found. Install Python 3.9+ and try again, or run start.bat for diagnostics.", 16, "DocFormatFix"
