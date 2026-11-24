@@ -40,7 +40,7 @@ python launcher.py --check
 python gui.py
 ```
 
-`tkinterdnd2` 用于拖拽增强；Windows 自带原生拖放，缺少该依赖时会自动回退，不影响主流程。macOS / Linux 没有 `.bat` / `.vbs` 入口，请直接运行 `python3 gui.py`；如果 `tkinterdnd2` 安装失败，可只安装 `python-docx`，程序仍可运行。
+`tkinterdnd2` 用于拖拽增强；Windows 自带原生拖放，缺少该依赖时会自动回退，不会阻止启动，也不会弹出环境缺失对话框。macOS / Linux 没有 `.bat` / `.vbs` 入口，请直接运行 `python3 gui.py`；如果 `tkinterdnd2` 安装失败，可只安装 `python-docx`，程序仍可运行。
 
 ### 启动失败排查
 

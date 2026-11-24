@@ -682,7 +682,12 @@ def main() -> None:
 
     scan = scan_current()
     log(json.dumps(scan, ensure_ascii=False))
-    if not scan["critical"] and not scan["optional"] and not scan["warnings"]:
+    if not scan["critical"] and not scan["warnings"]:
+        if scan["optional"]:
+            log(
+                "可选依赖缺失，使用原生拖放回退："
+                + "；".join(scan["optional"])
+            )
         launch_gui()
         return
 
