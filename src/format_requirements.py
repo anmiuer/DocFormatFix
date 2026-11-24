@@ -516,7 +516,12 @@ def _parse_fields(content: str, warnings: list, label: str = None) -> dict:
 
     # 字号
     size = None
-    for name in sorted(_CN_SIZE_MAP, key=len, reverse=True):
+    # 同一段文本里“小三号”同时包含“小三”和“三号”，必须优先匹配“小X”。
+    for name in sorted(
+        _CN_SIZE_MAP,
+        key=lambda item: (len(item), item.startswith("小")),
+        reverse=True,
+    ):
         if name in text:
             size = float(_CN_SIZE_MAP[name])
             text = text.replace(name, ",", 1)

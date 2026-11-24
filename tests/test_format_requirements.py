@@ -63,6 +63,32 @@ class FormatRequirementsTest(unittest.TestCase):
         self.assertEqual(result["template"]["正文"]["line_spacing"], "20pt")
         self.assertEqual(result["warnings"], [])
 
+    def test_chinese_size_priority(self) -> None:
+        cases = {
+            "三号宋体": 16,
+            "小三号宋体": 15,
+            "四号宋体": 14,
+            "小四号宋体": 12,
+            "二号宋体": 22,
+            "小二号宋体": 18,
+            "五号宋体": 10.5,
+            "小五号宋体": 9,
+            "初号宋体": 42,
+            "小初宋体": 36,
+        }
+        for source, expected in cases.items():
+            with self.subTest(source=source):
+                result = parse_requirements(f"正文：{source}", {})
+                self.assertEqual(result["labels"]["正文"]["size"], expected)
+
+        result = parse_requirements(
+            "二级标题：小三号宋体，顶格，加粗\n"
+            "正文：首行缩进2字符，小四号宋体",
+            {},
+        )
+        self.assertEqual(result["labels"]["二级标题"]["size"], 15)
+        self.assertEqual(result["labels"]["正文"]["size"], 12)
+
     def test_markdown_table_and_unlabeled_text(self) -> None:
         table = (
             "| 段落类型 | 字体 | 字号 | 其他 |\n"
